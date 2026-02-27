@@ -383,10 +383,27 @@ export const ConfigManager = () => {
                           {config.peer.PublicKey.substring(0, 8)}...
                         </span>
                       </div>
-                      {config.interface.Jc && (
+                      {config.interface.DNS && (
+                        <div className="flex justify-between">
+                          <span>DNS:</span>
+                          <span className="truncate w-24">{config.interface.DNS}</span>
+                        </div>
+                      )}
+                      {config.interface.MTU && (
+                        <div className="flex justify-between">
+                          <span>MTU:</span>
+                          <span>{config.interface.MTU}</span>
+                        </div>
+                      )}
+                      {config.interface.Jc ? (
                         <div className="flex justify-between text-purple-600 font-bold">
                           <span>Obfuscated:</span>
                           <span>Yes (Jc={config.interface.Jc})</span>
+                        </div>
+                      ) : (
+                        <div className="flex justify-between text-slate-500">
+                          <span>Type:</span>
+                          <span>Standard WG</span>
                         </div>
                       )}
                     </div>

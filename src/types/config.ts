@@ -5,6 +5,7 @@ export interface WireGuardConfig {
     PrivateKey: string;
     Address: string;
     DNS?: string;
+    MTU?: string;
     Jc?: string;
     Jmin?: string;
     Jmax?: string;

@@ -204,10 +204,13 @@ export const generateWireGuardConfigText = (config: WireGuardConfig): string => 
 
 export const generateAmneziaBackup = (configs: WireGuardConfig[]): string => {
   // Construct a robust Amnezia backup structure
-  // User specified: Servers/serversList is stringified array, last_config is stringified JSON
   
   const serverList = configs.map((cfg, index) => {
-    // The inner config object (AmneziaWG JSON format)
+    // Determine if this is AmneziaWG (obfuscated) or standard WireGuard
+    const isObfuscated = !!cfg.interface.Jc;
+    const containerType = isObfuscated ? "amnezia-awg" : "wireguard";
+
+    // The inner config object
     const innerConfig = {
       config: {
         ...cfg.interface
@@ -227,15 +230,12 @@ export const generateAmneziaBackup = (configs: WireGuardConfig[]): string => {
       description: cfg.name || `Server ${index + 1}`,
       hostName: cfg.peer.Endpoint?.split(':')[0] || '0.0.0.0',
       port: parseInt(cfg.peer.Endpoint?.split(':')[1] || '51820'),
-      defaultContainer: "amnezia-awg", 
+      defaultContainer: containerType, 
       containers: [
         {
           id: crypto.randomUUID(),
-          containerType: "amnezia-awg",
-          awg: {
-             last_config: lastConfigString
-          },
-          wireguard: { // Fallback/Alternative
+          containerType: containerType,
+          [isObfuscated ? "awg" : "wireguard"]: {
              last_config: lastConfigString
           }
         }
@@ -243,17 +243,10 @@ export const generateAmneziaBackup = (configs: WireGuardConfig[]): string => {
     };
   });
 
-  // Create the root object
-  // We will provide a standard structure. 
-  // If the user wants "serversList" to be a stringified array, we can do that,
-  // but usually the app imports standard JSON too. 
-  // Let's stick to standard JSON for the root to ensure compatibility, 
-  // but ensure the internal stringification (last_config) is correct.
-  
   const backup = {
     version: 1,
     defaultServerIndex: 0,
-    servers: serverList // Using 'servers' as it's common. 
+    servers: serverList
   };
 
   return JSON.stringify(backup, null, 2);
